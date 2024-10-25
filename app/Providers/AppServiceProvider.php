@@ -27,25 +27,32 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //выдаст Exception если в коде забудем указать EagerLoad и возникнут жадные загрузки N+1
-        Model::preventLazyLoading(!app()->isProduction());
         //Exception если не сохнанаем модель не добавив поля в fillable
-        Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
+        //выдаст Exception если в коде забудем указать EagerLoad и возникнут жадные загрузки N+1
+        //Model::shouldBeStrict(!app()->isProduction());
 
         //Действие если запросы к базе выполняются дольше чем 1000мс
+        if (app()->isProduction()){
+            DB::whenQueryingForLongerThan(1000, function (Connection $connection) {
+                logger()->channel('telegram')->debug('whenQueryingForLongerThan: '. $connection->totalQueryDuration());
+            });
 
-        DB::whenQueryingForLongerThan(1000, function (Connection $connection) {
-            logger()->channel('telegram')->debug('whenQueryingForLongerThan: '. $connection->query()->toSql());
-        });
+            DB::listen(function ($query) {
+                if ($query->time > 100){
+                    logger()->channel('telegram')->debug('whenQueryingForLongerThan: '. $query->sql, $query->bindings);
+                }
+            });
 
-        //Запрос гуляет более 4 секунд
-        $kernel = app(Kernel::class);
-        $kernel->whenRequestLifecycleIsLongerThan(
-            CarbonInterval::seconds(4),
-            function(){
-                logger()->channel('telegram')->debug('whenRequestLifecycleIsLongerThan: '. request()->url());
-            }
-        );
+            //Запрос гуляет более 4 секунд
+            $kernel = app(Kernel::class);
+            $kernel->whenRequestLifecycleIsLongerThan(
+                CarbonInterval::seconds(4),
+                function(){
+                    logger()->channel('telegram')->debug('whenRequestLifecycleIsLongerThan: '. request()->url());
+                }
+            );
+        }
+
 
     }
 }

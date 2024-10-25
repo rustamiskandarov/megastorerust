@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
-class TasksController extends Controller
+class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $tasks = Task::all();
-        return view('product.index', compact('tasks'));
+        $products = Product::all();
+        return view('product.index', compact('products'));
     }
 
     /**

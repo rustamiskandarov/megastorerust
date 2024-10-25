@@ -16,5 +16,5 @@ Route::get('/', function () {
 
     return view('welcome');
 });
-Route::get('/tasks', [\App\Http\Controllers\TasksController::class, 'index']
+Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index']
 );
