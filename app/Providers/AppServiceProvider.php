@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Http\Kernel;
-use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
@@ -33,10 +32,10 @@ class AppServiceProvider extends ServiceProvider
         //Exception если не сохнанаем модель не добавив поля в fillable
         Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
 
-        //Действие если запросы к базе выполняются дольше чем 500мс
+        //Действие если запросы к базе выполняются дольше чем 1000мс
 
-        DB::whenQueryingForLongerThan(500, function (Connection $connection) {
-            logger()->channel('telegram')->debug('whenQueryingForLongerThan: '. $connection->toSql());
+        DB::whenQueryingForLongerThan(1000, function (Connection $connection) {
+            logger()->channel('telegram')->debug('whenQueryingForLongerThan: '. $connection->query()->toSql());
         });
 
         //Запрос гуляет более 4 секунд
